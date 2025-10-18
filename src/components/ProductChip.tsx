@@ -107,18 +107,18 @@ export function ProductChip({
         <span className="text-sm whitespace-nowrap">{label}</span>
       </motion.div>
       
-      {/* Guide message */}
+      {/* Guide message - shows on all chips when hint is enabled */}
       <AnimatePresence>
         {showHint && !isSelected && !isDragging && !hasBeenDragged && (
           <motion.div
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
-            transition={{ duration: 0.3, delay: 0.2 }}
-            className="absolute top-full left-1/2 -translate-x-1/2 mt-2 whitespace-nowrap"
+            transition={{ duration: 0.3 }}
+            className="absolute top-full left-1/2 -translate-x-1/2 mt-2 whitespace-nowrap z-30"
           >
             <div className="bg-black text-white text-xs px-3 py-1.5 rounded-[12px] shadow-lg">
-              Drag to position this product
+              Tap to select • Drag to move
               <div className="absolute -top-1 left-1/2 -translate-x-1/2 size-2 bg-black rotate-45" />
             </div>
           </motion.div>

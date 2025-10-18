@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "./ui/sheet";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
@@ -17,6 +17,7 @@ interface ProductBottomSheetProps {
   category: string;
   onPlaceProduct: () => void;
   isRendering?: boolean;
+  renderingQueueCount?: number;
 }
 
 // Mock product data for different categories
@@ -171,24 +172,45 @@ const productsByCategory: Record<string, Product[]> = {
   ],
 };
 
-export function ProductBottomSheet({ isOpen, onClose, category, onPlaceProduct, isRendering = false }: ProductBottomSheetProps) {
+export function ProductBottomSheet({ isOpen, onClose, category, onPlaceProduct, isRendering = false, renderingQueueCount = 0 }: ProductBottomSheetProps) {
   const products = productsByCategory[category] || [];
   const [renderingProductIds, setRenderingProductIds] = useState<Set<number>>(new Set());
+  const [renderingTimers, setRenderingTimers] = useState<Map<number, NodeJS.Timeout>>(new Map());
 
   const handlePlaceProduct = (product: Product) => {
     // Add this product to rendering set
     setRenderingProductIds(prev => new Set(prev).add(product.id));
     onPlaceProduct();
 
-    // Remove from rendering after 5 seconds
-    setTimeout(() => {
+    // Clear any existing timer for this product
+    if (renderingTimers.has(product.id)) {
+      clearTimeout(renderingTimers.get(product.id)!);
+    }
+
+    // Set new timer to remove from rendering after 5 seconds
+    const timer = setTimeout(() => {
       setRenderingProductIds(prev => {
         const newSet = new Set(prev);
         newSet.delete(product.id);
         return newSet;
       });
+      // Clean up the timer reference
+      setRenderingTimers(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(product.id);
+        return newMap;
+      });
     }, 5000);
+
+    setRenderingTimers(prev => new Map(prev).set(product.id, timer));
   };
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      renderingTimers.forEach(timer => clearTimeout(timer));
+    };
+  }, [renderingTimers]);
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
