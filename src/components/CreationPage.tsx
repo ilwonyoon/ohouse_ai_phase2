@@ -167,11 +167,7 @@ export function CreationPage({
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ 
-              type: "tween",
-              ease: [0.32, 0.72, 0, 1],
-              duration: 0.35
-            }}
+            transition={SLIDE_ANIMATION_CONFIG}
             className="absolute inset-0"
           >
             <RoomAnalysisPage

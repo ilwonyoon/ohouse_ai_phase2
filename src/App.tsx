@@ -219,13 +219,8 @@ export default function App() {
   };
 
   const handleBackToHome = () => {
-    // Reset the creation page state when going back to home
-    if (currentPage !== "home") {
-      setCreationPageStates(prev => ({
-        ...prev,
-        [currentPage]: { selectedSpace: "", selectedImage: "", showAnalysis: false, analysisCompleted: false }
-      }));
-    }
+    // Don't reset state - preserve it for when user returns
+    // Only clear the previous page reference
     setCurrentPage("home");
     setPreviousPage(null);
   };

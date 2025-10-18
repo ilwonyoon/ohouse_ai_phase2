@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "motion/react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "./ui/sheet";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
@@ -224,20 +225,53 @@ export function ProductBottomSheet({ isOpen, onClose, category, onPlaceProduct, 
                 </div>
 
                 {/* Place it Button */}
-                <button
+                <motion.button
                   onClick={(e) => {
                     e.stopPropagation();
                     handlePlaceProduct(product);
                   }}
                   disabled={renderingProductId === product.id}
-                  className={`self-center shrink-0 h-[32px] px-4 rounded-[6px] text-sm font-medium transition-all ${
+                  layout
+                  initial={false}
+                  animate={{
+                    scale: renderingProductId === product.id ? 0.95 : 1,
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 25,
+                    duration: 0.3,
+                  }}
+                  className={`self-center shrink-0 h-[32px] px-4 rounded-[6px] text-sm font-medium relative overflow-hidden ${
                     renderingProductId === product.id
-                      ? 'bg-gray-100 border border-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-white border border-border text-gray-900 hover:bg-gray-50 active:bg-gray-100 active:border-gray-400'
+                      ? 'cursor-not-allowed'
+                      : 'hover:bg-gray-50 active:bg-gray-100'
                   }`}
+                  style={renderingProductId === product.id ? {
+                    background: 'linear-gradient(90deg, rgb(243, 244, 246), rgb(243, 244, 246)) padding-box, linear-gradient(90deg, rgb(59, 130, 246), rgb(147, 51, 234), rgb(59, 130, 246)) border-box',
+                    border: '2px solid transparent',
+                    backgroundClip: 'padding-box, border-box',
+                    backgroundOrigin: 'padding-box, border-box',
+                    animation: 'gradient-flow 2s linear infinite',
+                    color: 'rgb(156, 163, 175)',
+                  } : {
+                    background: 'white',
+                    border: '1px solid rgb(229, 231, 235)',
+                    color: 'rgb(17, 24, 39)',
+                  }}
                 >
+                  <style>{`
+                    @keyframes gradient-flow {
+                      0% {
+                        background-position: 0% center, 0% center;
+                      }
+                      100% {
+                        background-position: 200% center, 200% center;
+                      }
+                    }
+                  `}</style>
                   {renderingProductId === product.id ? 'Rendering...' : 'Place it'}
-                </button>
+                </motion.button>
               </div>
             ))}
           </div>
