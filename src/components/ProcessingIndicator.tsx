@@ -66,7 +66,7 @@ export function ProcessingIndicator({ elapsedSeconds }: ProcessingIndicatorProps
                     {currentStep}
                   </motion.p>
                 </AnimatePresence>
-                <p className="text-sm text-gray-500 mt-1.5">{elapsedSeconds}s</p>
+                <p className="text-sm text-gray-600 mt-1.5">{elapsedSeconds}s</p>
               </div>
             </div>
           </motion.div>

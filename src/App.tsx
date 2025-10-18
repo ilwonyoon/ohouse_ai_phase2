@@ -413,22 +413,36 @@ export default function App() {
 
                   {/* Explore Feed Section */}
                   <div className="py-4">
-                    <h2 className="px-4">Explore Feed</h2>
+                    <div className="flex items-center justify-between px-4 mb-2">
+                      <h2>Explore Feed {(selectedRoomType || selectedStyle || selectedBudget) && <span className="text-xs text-gray-500 ml-2">({(selectedRoomType ? 1 : 0) + (selectedStyle ? 1 : 0) + (selectedBudget ? 1 : 0)} active)</span>}</h2>
+                      {(selectedRoomType || selectedStyle || selectedBudget) && (
+                        <button
+                          onClick={() => {
+                            setSelectedRoomType("");
+                            setSelectedStyle("");
+                            setSelectedBudget("");
+                          }}
+                          className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                        >
+                          Clear all
+                        </button>
+                      )}
+                    </div>
                     <div className="flex gap-2 overflow-x-auto pb-2 px-4 scrollbar-hide mt-2">
-                      <FilterChip 
-                        label="Room Type" 
+                      <FilterChip
+                        label="Room Type"
                         options={roomTypes}
                         selectedValue={selectedRoomType}
                         onSelect={handleRoomTypeSelect}
                       />
-                      <FilterChip 
-                        label="Style" 
+                      <FilterChip
+                        label="Style"
                         options={styles}
                         selectedValue={selectedStyle}
                         onSelect={handleStyleSelect}
                       />
-                      <FilterChip 
-                        label="Budget" 
+                      <FilterChip
+                        label="Budget"
                         options={budgets}
                         selectedValue={selectedBudget}
                         onSelect={handleBudgetSelect}
