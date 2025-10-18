@@ -173,18 +173,21 @@ const productsByCategory: Record<string, Product[]> = {
 
 export function ProductBottomSheet({ isOpen, onClose, category, onPlaceProduct, isRendering = false }: ProductBottomSheetProps) {
   const products = productsByCategory[category] || [];
-  const [renderingProductId, setRenderingProductId] = useState<number | null>(null);
+  const [renderingProductIds, setRenderingProductIds] = useState<Set<number>>(new Set());
 
   const handlePlaceProduct = (product: Product) => {
-    if (!renderingProductId) {
-      setRenderingProductId(product.id);
-      onPlaceProduct();
+    // Add this product to rendering set
+    setRenderingProductIds(prev => new Set(prev).add(product.id));
+    onPlaceProduct();
 
-      // Reset after rendering completes (5 seconds based on constants)
-      setTimeout(() => {
-        setRenderingProductId(null);
-      }, 5000);
-    }
+    // Remove from rendering after 5 seconds
+    setTimeout(() => {
+      setRenderingProductIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(product.id);
+        return newSet;
+      });
+    }, 5000);
   };
 
   return (
@@ -230,11 +233,11 @@ export function ProductBottomSheet({ isOpen, onClose, category, onPlaceProduct, 
                     e.stopPropagation();
                     handlePlaceProduct(product);
                   }}
-                  disabled={renderingProductId === product.id}
+                  disabled={renderingProductIds.has(product.id)}
                   layout
                   initial={false}
                   animate={{
-                    scale: renderingProductId === product.id ? 0.95 : 1,
+                    scale: renderingProductIds.has(product.id) ? 0.95 : 1,
                   }}
                   transition={{
                     type: "spring",
@@ -243,11 +246,11 @@ export function ProductBottomSheet({ isOpen, onClose, category, onPlaceProduct, 
                     duration: 0.3,
                   }}
                   className={`self-center shrink-0 h-[32px] px-4 rounded-[6px] text-sm font-medium relative overflow-hidden ${
-                    renderingProductId === product.id
+                    renderingProductIds.has(product.id)
                       ? 'cursor-not-allowed'
                       : 'hover:bg-gray-50 active:bg-gray-100'
                   }`}
-                  style={renderingProductId === product.id ? {
+                  style={renderingProductIds.has(product.id) ? {
                     background: 'linear-gradient(90deg, rgb(243, 244, 246), rgb(243, 244, 246)) padding-box, linear-gradient(90deg, rgb(59, 130, 246), rgb(147, 51, 234), rgb(59, 130, 246)) border-box',
                     border: '2px solid transparent',
                     backgroundClip: 'padding-box, border-box',
@@ -270,7 +273,7 @@ export function ProductBottomSheet({ isOpen, onClose, category, onPlaceProduct, 
                       }
                     }
                   `}</style>
-                  {renderingProductId === product.id ? 'Rendering...' : 'Place it'}
+                  {renderingProductIds.has(product.id) ? 'Rendering...' : 'Place it'}
                 </motion.button>
               </div>
             ))}
