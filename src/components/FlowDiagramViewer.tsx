@@ -175,8 +175,9 @@ export const FlowDiagramViewer: React.FC = () => {
       </div>
 
       {/* Main Canvas - React Flow */}
-      <div className="flex-1 relative">
+      <div className="flex-1 relative" style={{ width: '100%', height: '100%' }}>
         <ReactFlow
+          style={{ width: '100%', height: '100%' }}
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
