@@ -6,9 +6,7 @@ import { FeedCard } from "./components/FeedCard";
 import { CreationPage } from "./components/CreationPage";
 import { RenderingQueueIndicator } from "./components/RenderingQueueIndicator";
 import { MyPageContent } from "./components/MyPageContent";
-import DesignSystemViewer from "./components/DesignSystemViewer";
 import { Toaster } from "./components/ui/sonner";
-import { Palette, Home, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner@2.0.3";
 import {
@@ -96,10 +94,7 @@ const imagesByFilter: Record<string, string[]> = {
 
 type Page = "home" | "placeObject" | "interiorDesign" | "exteriorDesign";
 
-type ViewMode = "flow" | "design-system";
-
 export default function App() {
-  const [viewMode, setViewMode] = useState<ViewMode>("flow");
   const [currentPage, setCurrentPage] = useState<Page>("home");
   const [selectedRoomType, setSelectedRoomType] = useState<string>("");
   const [selectedStyle, setSelectedStyle] = useState<string>("");
@@ -301,30 +296,6 @@ export default function App() {
     }
   };
 
-  // Show design system viewer if in design-system mode
-  if (viewMode === "design-system") {
-    return (
-      <div className="w-screen h-screen flex flex-col bg-white overflow-hidden">
-        {/* View Mode Toggle Header */}
-        <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-gray-200 bg-white sticky top-0 z-40 flex-shrink-0">
-          <h1 className="text-xl md:text-2xl font-bold text-gray-900">Ohouse AI Design System</h1>
-          <button
-            onClick={() => setViewMode("flow")}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-          >
-            <Home size={18} />
-            <span>Flow View</span>
-          </button>
-        </div>
-
-        {/* Design System Viewer - Fills remaining space */}
-        <div className="flex-1 overflow-auto">
-          <DesignSystemViewer />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="size-full flex items-center justify-center bg-gray-100">
       {/* Toast Notifications */}
@@ -337,16 +308,6 @@ export default function App() {
           },
         }}
       />
-
-      {/* View Mode Toggle Button */}
-      <button
-        onClick={() => setViewMode("design-system")}
-        className="fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-2 bg-white text-gray-900 rounded-lg shadow-lg hover:shadow-xl transition-shadow border border-gray-200 font-medium text-sm"
-        title="Switch to Design System View"
-      >
-        <Zap size={18} className="text-purple-600" />
-        <span>Design System</span>
-      </button>
 
       {/* Mobile Screen Container */}
       <div
