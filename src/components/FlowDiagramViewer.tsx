@@ -101,7 +101,7 @@ export const FlowDiagramViewer: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-full bg-gradient-to-br from-slate-50 to-slate-100 flex">
+    <div className="w-full h-full bg-gradient-to-br from-slate-50 to-slate-100 flex" style={{ height: '100vh', width: '100vw' }}>
       {/* Left Sidebar - Flow List */}
       <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">
@@ -175,7 +175,8 @@ export const FlowDiagramViewer: React.FC = () => {
       </div>
 
       {/* Main Canvas - React Flow */}
-      <div className="flex-1 relative" style={{ width: '100%', height: '100%' }}>
+      <div className="flex-1 relative">
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
         <ReactFlow
           style={{ width: '100%', height: '100%' }}
           nodes={nodes}
@@ -229,6 +230,7 @@ export const FlowDiagramViewer: React.FC = () => {
             </div>
           </Panel>
         </ReactFlow>
+        </div>
       </div>
 
       {/* Right Sidebar - Node Details */}
