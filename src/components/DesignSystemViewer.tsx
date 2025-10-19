@@ -51,16 +51,8 @@ export const DesignSystemViewer: React.FC = () => {
 
   return (
     <div className="w-full h-full overflow-auto bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-slate-900 to-slate-700 text-white px-4 py-8 md:px-8 md:py-12">
-        <div className="max-w-full md:max-w-7xl mx-auto">
-          <h1 className="text-2xl md:text-4xl font-bold mb-1 md:mb-2">Design System</h1>
-          <p className="text-slate-300 text-sm md:text-lg">Complete Design Tokens Reference</p>
-        </div>
-      </div>
-
       {/* Main Content */}
-      <div className="px-4 py-6 md:px-8 md:py-8">
+      <div className="px-4 py-6 md:px-8 md:py-8 w-full">
         <div className="max-w-full md:max-w-7xl mx-auto">
           <Tabs defaultValue="colors" className="w-full">
             {/* Tab Navigation - Responsive */}
@@ -498,14 +490,6 @@ export const DesignSystemViewer: React.FC = () => {
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="border-t border-gray-200 bg-white px-4 py-6 md:px-8 md:py-8 mt-8">
-        <div className="max-w-full md:max-w-7xl mx-auto">
-          <p className="text-xs md:text-sm text-gray-600 text-center">
-            Design System v1.0 • Built with shadcn/ui & Tailwind CSS
-          </p>
-        </div>
-      </div>
     </div>
   );
 };
