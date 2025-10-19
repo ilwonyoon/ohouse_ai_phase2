@@ -422,7 +422,8 @@ export default function App() {
                 {activeTab === "mypage" && previousPage && (
                   <button
                     onClick={handleBackFromMyPage}
-                    className="absolute left-4 flex items-center gap-1 text-[17px] text-primary hover:opacity-70 transition-opacity active:opacity-50"
+                    className="absolute left-4 flex items-center gap-1 text-[17px] text-primary hover:opacity-70 transition-opacity active:opacity-50 cursor-pointer z-20"
+                    aria-label={`Go back to ${getPageTitle(previousPage)}`}
                   >
                     <svg 
                       width="13" 

@@ -64,10 +64,11 @@ export function RoomAnalysisPage({
   return (
     <div className="size-full flex flex-col bg-background">
       {/* iOS Top Navigation Bar */}
-      <div className="h-[44px] bg-background border-b border-border flex items-center px-4 shrink-0 relative">
+      <div className="h-[44px] bg-background border-b border-border flex items-center px-4 shrink-0 relative z-10">
         <button 
           onClick={onBack}
-          className="size-8 flex items-center justify-center -ml-2"
+          className="size-8 flex items-center justify-center -ml-2 cursor-pointer hover:opacity-70 active:opacity-50 transition-opacity relative z-20"
+          aria-label="Go back"
         >
           <ArrowLeft className="size-5" />
         </button>

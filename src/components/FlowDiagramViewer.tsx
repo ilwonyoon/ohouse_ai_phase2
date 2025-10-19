@@ -37,12 +37,19 @@ export const FlowDiagramViewer: React.FC = () => {
 
   // Convert flow data to React Flow format
   const { nodes: initialNodes, edges: initialEdges } = useMemo(
-    () => convertFlowsToReactFlow(flows),
+    () => {
+      const result = convertFlowsToReactFlow(flows);
+      console.log('FlowDiagramViewer - Nodes:', result.nodes.length, result.nodes);
+      console.log('FlowDiagramViewer - Edges:', result.edges.length, result.edges);
+      return result;
+    },
     []
   );
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+  console.log('ReactFlow rendering with:', nodes.length, 'nodes', edges.length, 'edges');
 
   // Handle node click
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
