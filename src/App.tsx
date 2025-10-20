@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { FeatureCard } from "./components/FeatureCard";
 import { FilterChip } from "./components/FilterChip";
@@ -6,6 +6,7 @@ import { FeedCard } from "./components/FeedCard";
 import { CreationPage } from "./components/CreationPage";
 import { RenderingQueueIndicator } from "./components/RenderingQueueIndicator";
 import { MyPageContent } from "./components/MyPageContent";
+import { CreationModeModal } from "./components/CreationModeModal";
 import { Toaster } from "./components/ui/sonner";
 import { motion, AnimatePresence } from "motion/react";
 import { Palette, Home } from "lucide-react";
@@ -23,10 +24,18 @@ const { ROOM_TYPES: roomTypes, STYLES: styles, BUDGETS: budgets } = FILTER_OPTIO
 
 type Page = "home" | "placeObject" | "interiorDesign" | "exteriorDesign";
 
+const NAV_BAR_HEIGHT = 44;
+const TAB_BAR_HEIGHT = 44;
+
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>("home");
   const [activeTab, setActiveTab] = useState<string>("home");
   const [previousPage, setPreviousPage] = useState<Page | null>(null);
+  const [showCreationModeModal, setShowCreationModeModal] = useState(false);
+  const [pendingRoomType, setPendingRoomType] = useState<string>("");
+  const homeScrollRef = useRef<HTMLDivElement | null>(null);
+  const lastScrollTopRef = useRef(0);
+  const [isTabBarHidden, setIsTabBarHidden] = useState(false);
 
   // Use custom hooks for cleaner state management
   const {
@@ -59,35 +68,111 @@ export default function App() {
     exteriorDesign: { selectedSpace: "", selectedImage: "", showAnalysis: false, analysisCompleted: false },
   });
 
+  useEffect(() => {
+    if (currentPage !== "home" || activeTab !== "home") {
+      setIsTabBarHidden(false);
+      return;
+    }
+
+    const scrollContainer = homeScrollRef.current;
+    if (!scrollContainer) {
+      return;
+    }
+
+    lastScrollTopRef.current = scrollContainer.scrollTop;
+
+    const handleScroll = () => {
+      const currentTop = scrollContainer.scrollTop;
+      const delta = currentTop - lastScrollTopRef.current;
+      const nearTop = currentTop <= 16;
+
+      lastScrollTopRef.current = currentTop;
+
+      setIsTabBarHidden((prev) => {
+        if (nearTop) {
+          return false;
+        }
+        if (delta > 4) {
+          return true;
+        }
+        if (delta < -4) {
+          return false;
+        }
+        return prev;
+      });
+    };
+
+    scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      scrollContainer.removeEventListener("scroll", handleScroll);
+    };
+  }, [activeTab, currentPage]);
+
   const handleFeatureCardClick = (page: Page) => {
     setCurrentPage(page);
   };
 
   const handleBackToHome = () => {
-    // Don't reset state - preserve it for when user returns
-    // Only clear the previous page reference
+    // Reset the current creation page state when going back to home
+    if (currentPage !== "home") {
+      setCreationPageStates(prev => ({
+        ...prev,
+        [currentPage]: { selectedSpace: "", selectedImage: "", showAnalysis: false, analysisCompleted: false }
+      }));
+    }
     setCurrentPage("home");
     setPreviousPage(null);
   };
 
   const handleRenderingIndicatorClick = () => {
-    // Remember the current page if we're not already on home
-    if (currentPage !== "home") {
-      setPreviousPage(currentPage);
-    }
+    // Reset all creation page states for a fresh start
+    setCreationPageStates({
+      home: { selectedSpace: "", selectedImage: "", showAnalysis: false, analysisCompleted: false },
+      placeObject: { selectedSpace: "", selectedImage: "", showAnalysis: false, analysisCompleted: false },
+      interiorDesign: { selectedSpace: "", selectedImage: "", showAnalysis: false, analysisCompleted: false },
+      exteriorDesign: { selectedSpace: "", selectedImage: "", showAnalysis: false, analysisCompleted: false },
+    });
+    // Don't remember previous page - fresh start from home
+    setPreviousPage(null);
     // Navigate to home page first, then switch to My Page tab
     setCurrentPage("home");
     setActiveTab("mypage");
   };
 
   const handleBackFromMyPage = () => {
-    // Return to the previous page if it exists
-    if (previousPage) {
-      setCurrentPage(previousPage);
-      setPreviousPage(null);
-    }
-    // Always return to home tab when going back
+    // Always return to home tab when going back from My Page
     setActiveTab("home");
+    // Clear previous page reference
+    setPreviousPage(null);
+  };
+
+  // Handle Create button click from My Page
+  const handleCreateFromMyPage = (roomType: string) => {
+    setPendingRoomType(roomType);
+    setShowCreationModeModal(true);
+  };
+
+  // Handle creation mode selection from modal
+  const handleCreationModeSelect = (mode: Page) => {
+    // Pre-populate the selected space for the chosen creation mode
+    setCreationPageStates(prev => ({
+      ...prev,
+      [mode]: {
+        ...prev[mode],
+        selectedSpace: pendingRoomType,
+        selectedImage: "",
+        showAnalysis: false,
+        analysisCompleted: false
+      }
+    }));
+
+    // Navigate to the creation page
+    setCurrentPage(mode);
+    setActiveTab("home");
+
+    // Clear pending room type
+    setPendingRoomType("");
   };
 
   // Update creation page state
@@ -110,6 +195,8 @@ export default function App() {
         return "Ohouse ai";
     }
   };
+
+  const filterChipsOffset = NAV_BAR_HEIGHT + (isTabBarHidden ? 0 : TAB_BAR_HEIGHT);
 
   return (
     <div className="size-full flex items-center justify-center bg-gray-100">
@@ -280,8 +367,11 @@ export default function App() {
                 </TabsContent>
 
                 <TabsContent value="mypage" className="flex-1 m-0 overflow-y-auto">
-                  <div className="p-4">
-                    <MyPageContent renderingItems={allRenderingItems} />
+                  <div className="pt-3 px-3">
+                    <MyPageContent
+                      renderingItems={allRenderingItems}
+                      onCreateRoom={handleCreateFromMyPage}
+                    />
                   </div>
                 </TabsContent>
               </Tabs>
@@ -312,6 +402,17 @@ export default function App() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Creation Mode Selection Modal */}
+        <CreationModeModal
+          isOpen={showCreationModeModal}
+          onClose={() => {
+            setShowCreationModeModal(false);
+            setPendingRoomType("");
+          }}
+          onSelectMode={handleCreationModeSelect}
+          roomType={pendingRoomType}
+        />
       </div>
     </div>
   );
