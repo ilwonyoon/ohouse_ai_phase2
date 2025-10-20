@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { useState, useRef } from "react";
+import { motion } from "motion/react";
 
 interface ProductChipProps {
   label: string;
@@ -9,25 +9,22 @@ interface ProductChipProps {
   onSelect: () => void;
   containerWidth: number;
   containerHeight: number;
-  showHint?: boolean;
 }
 
-export function ProductChip({ 
-  label, 
-  initialX, 
-  initialY, 
+export function ProductChip({
+  label,
+  initialX,
+  initialY,
   isSelected,
   onSelect,
   containerWidth,
-  containerHeight,
-  showHint = false
+  containerHeight
 }: ProductChipProps) {
   const [position, setPosition] = useState({ x: initialX, y: initialY });
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef<HTMLDivElement>(null);
   const dragStartPos = useRef({ x: 0, y: 0 });
   const hasMoved = useRef(false);
-  const [hasBeenDragged, setHasBeenDragged] = useState(false);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     e.stopPropagation();
@@ -68,12 +65,7 @@ export function ProductChip({
   const handlePointerUp = (e: React.PointerEvent) => {
     setIsDragging(false);
     (e.target as HTMLElement).releasePointerCapture(e.pointerId);
-    
-    // Track if user has dragged to hide the hint
-    if (hasMoved.current) {
-      setHasBeenDragged(true);
-    }
-    
+
     // Only toggle selection if we didn't drag (just tapped)
     if (!hasMoved.current) {
       onSelect();
@@ -106,24 +98,6 @@ export function ProductChip({
       >
         <span className="text-sm whitespace-nowrap">{label}</span>
       </motion.div>
-      
-      {/* Guide message - shows on all chips when hint is enabled */}
-      <AnimatePresence>
-        {showHint && !isSelected && !isDragging && !hasBeenDragged && (
-          <motion.div
-            initial={{ opacity: 0, y: -5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -5 }}
-            transition={{ duration: 0.3 }}
-            className="absolute top-full left-1/2 -translate-x-1/2 mt-2 whitespace-nowrap z-30"
-          >
-            <div className="bg-black text-white text-xs px-3 py-1.5 rounded-[12px] shadow-lg">
-              Tap to select • Drag to move
-              <div className="absolute -top-1 left-1/2 -translate-x-1/2 size-2 bg-black rotate-45" />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

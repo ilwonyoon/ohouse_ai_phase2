@@ -1,0 +1,252 @@
+{
+  "projectName": "Ohouse AI Phase 2",
+  "version": "1.0.0",
+  "lastUpdated": "2025-01-20",
+  "spacingSystem": {
+    "baseUnit": "4px",
+    "philosophy": "4px base unit following Material Design, Apple HIG, and IBM Carbon best practices for mathematical precision and optimal scaling across screen densities",
+    "tokens": {
+      "xs": {
+        "value": "2px",
+        "tailwind": "0.5",
+        "cssVar": "--spacing-xs",
+        "usage": ["Text line spacing", "Icon adjustments", "Fine positioning"],
+        "examples": ["Text-to-icon spacing", "Badge positioning", "Micro adjustments"]
+      },
+      "sm": {
+        "value": "4px",
+        "tailwind": "1",
+        "cssVar": "--spacing-sm",
+        "usage": ["Tight element spacing", "Label-to-input", "Chip internal padding"],
+        "examples": ["Form label gaps", "Button icon spacing", "Chip padding"]
+      },
+      "md": {
+        "value": "6px",
+        "tailwind": "1.5",
+        "cssVar": "--spacing-md",
+        "usage": ["Small component internal spacing", "Button padding", "Card internal"],
+        "examples": ["Button internal padding", "Small card padding", "Input internal spacing"]
+      },
+      "base": {
+        "value": "8px",
+        "tailwind": "2",
+        "cssVar": "--spacing-base",
+        "usage": ["Standard element spacing", "Default gap", "Related elements"],
+        "examples": ["Standard gap between elements", "List item spacing", "Form field internal"]
+      },
+      "lg": {
+        "value": "12px",
+        "tailwind": "3",
+        "cssVar": "--spacing-lg",
+        "usage": ["Component internal spacing", "Form field groups", "Card content"],
+        "examples": ["Card internal padding", "Form group spacing", "Component content area"]
+      },
+      "xl": {
+        "value": "16px",
+        "tailwind": "4",
+        "cssVar": "--spacing-xl",
+        "usage": ["Layout spacing", "Grid margins", "Major component spacing"],
+        "examples": ["Mobile grid margins", "Container padding", "Major element spacing"],
+        "note": "PRIMARY LAYOUT TOKEN - Use for all mobile grid containers"
+      },
+      "2xl": {
+        "value": "20px",
+        "tailwind": "5",
+        "cssVar": "--spacing-2xl",
+        "usage": ["Component-to-component spacing", "Vertical rhythm", "Section breaks"],
+        "examples": ["Feature card to explore feed", "Section transitions", "Major content blocks"]
+      },
+      "3xl": {
+        "value": "24px",
+        "tailwind": "6",
+        "cssVar": "--spacing-3xl",
+        "usage": ["Section spacing", "Feature headers", "Content separation"],
+        "examples": ["Section headers", "Feature card spacing", "Major content separation"]
+      },
+      "4xl": {
+        "value": "32px",
+        "tailwind": "8",
+        "cssVar": "--spacing-4xl",
+        "usage": ["Major section separation", "Page-level spacing", "Hero sections"],
+        "examples": ["Page sections", "Hero to content", "Major layout breaks"]
+      }
+    }
+  },
+  "contextualGuidelines": {
+    "mobileLayout": {
+      "screenWidth": "375px",
+      "horizontalMargins": "16px (xl)",
+      "verticalRhythm": "12px (lg) base, 20px (2xl) for major breaks",
+      "touchTargets": "Minimum 44px total (content + padding)",
+      "gridGap": "9px (custom for visual balance)"
+    },
+    "componentSpacing": {
+      "featureCards": {
+        "internalPadding": "12px (lg)",
+        "gapBetweenCards": "12px (lg)",
+        "marginFromContainer": "16px (xl)"
+      },
+      "feedGrid": {
+        "gridGap": "9px (custom - visual balance)",
+        "containerMargin": "16px (xl)",
+        "verticalSections": "20px (2xl)"
+      },
+      "navigation": {
+        "tabBarHeight": "44px",
+        "internalSpacing": "8px (base)",
+        "iconToText": "4px (sm)"
+      },
+      "formsInputs": {
+        "labelToInput": "4px (sm)",
+        "inputPadding": "12px (lg)",
+        "fieldToField": "16px (xl)"
+      }
+    }
+  },
+  "usageRules": {
+    "microSpacing": {
+      "range": "2-6px",
+      "tokens": ["xs", "sm", "md"],
+      "usage": "Text-to-icon spacing, fine adjustments, label spacing"
+    },
+    "componentSpacing": {
+      "range": "8-12px", 
+      "tokens": ["base", "lg"],
+      "usage": "Internal component spacing, form field groups"
+    },
+    "layoutSpacing": {
+      "range": "16-24px",
+      "tokens": ["xl", "2xl", "3xl"],
+      "usage": "Grid margins, component-to-component, section spacing"
+    },
+    "sectionSpacing": {
+      "range": "32px+",
+      "tokens": ["4xl"],
+      "usage": "Major section separation, page-level spacing"
+    }
+  },
+  "consistencyRules": [
+    "Never use arbitrary values - Always use defined tokens",
+    "Maintain vertical rhythm - Use consistent spacing between sections", 
+    "Respect touch targets - Ensure 44px minimum interactive areas",
+    "Scale appropriately - Larger spacing for larger components",
+    "Group related elements - Use smaller spacing within groups, larger between groups"
+  ],
+  "implementation": {
+    "cssCustomProperties": {
+      "--spacing-xs": "2px",
+      "--spacing-sm": "4px", 
+      "--spacing-md": "6px",
+      "--spacing-base": "8px",
+      "--spacing-lg": "12px",
+      "--spacing-xl": "16px",
+      "--spacing-2xl": "20px",
+      "--spacing-3xl": "24px",
+      "--spacing-4xl": "32px"
+    },
+    "tailwindMapping": {
+      "0.5": "2px (xs)",
+      "1": "4px (sm)",
+      "1.5": "6px (md)", 
+      "2": "8px (base)",
+      "3": "12px (lg)",
+      "4": "16px (xl)",
+      "5": "20px (2xl)",
+      "6": "24px (3xl)",
+      "8": "32px (4xl)"
+    },
+    "typescriptTokens": {
+      "SPACING": {
+        "xs": "2px",
+        "sm": "4px",
+        "md": "6px", 
+        "base": "8px",
+        "lg": "12px",
+        "xl": "16px",
+        "2xl": "20px",
+        "3xl": "24px",
+        "4xl": "32px"
+      },
+      "COMPONENT_SPACING": {
+        "MOBILE_MARGIN": "16px",
+        "GRID_GAP": "9px",
+        "SECTION_SPACING": "20px",
+        "CARD_PADDING": "12px",
+        "BUTTON_PADDING": "6px", 
+        "INPUT_PADDING": "12px",
+        "MIN_TOUCH_TARGET": "44px",
+        "ELEMENT_GAP": "8px",
+        "COMPONENT_GAP": "12px",
+        "SECTION_GAP": "24px"
+      }
+    }
+  },
+  "qualityAssurance": {
+    "auditChecklist": [
+      "All components use defined spacing tokens",
+      "No arbitrary spacing values (e.g., margin: 15px)",
+      "Consistent 16px horizontal margins on mobile", 
+      "Proper vertical rhythm with 12px/20px spacing",
+      "Touch targets meet 44px minimum",
+      "Related elements grouped with smaller spacing",
+      "Sections separated with larger spacing"
+    ],
+    "antiPatterns": {
+      "avoid": [
+        "margin: 15px; // Arbitrary value",
+        "padding: 10px 14px; // Mixed arbitrary values",
+        "gap: 7px; // Off-grid spacing"
+      ],
+      "useInstead": [
+        "margin: var(--spacing-xl); // 16px token", 
+        "padding: var(--spacing-lg); // 12px token",
+        "gap: var(--spacing-base); // 8px token"
+      ]
+    }
+  },
+  "responsiveConsiderations": {
+    "mobile": {
+      "width": "375px",
+      "scale": "1x (base spacing scale)"
+    },
+    "tablet": {
+      "width": "768px+", 
+      "scale": "1.25x if needed"
+    },
+    "desktop": {
+      "width": "1024px+",
+      "scale": "1.5x if needed"
+    },
+    "note": "Always maintain minimum touch targets (44px)"
+  },
+  "currentCodebaseAudit": {
+    "identifiedIssues": [
+      {
+        "file": "App.tsx",
+        "line": 308,
+        "current": "className=\"px-4 py-3 mb-3\"",
+        "issue": "Inconsistent spacing token usage",
+        "recommendation": "className=\"px-spacing-xl py-spacing-lg mb-spacing-lg\"",
+        "explanation": "px-4 (16px) = xl token ✅, py-3 (12px) = lg token but inconsistent usage"
+      }
+    ],
+    "nextSteps": [
+      "Audit all components against spacing tokens",
+      "Create spacing utility classes based on tokens", 
+      "Update component spacing to use defined tokens",
+      "Implement CSS custom properties",
+      "Add TypeScript token definitions"
+    ]
+  },
+  "metadata": {
+    "designSystemVersion": "1.0.0",
+    "compatibleWith": ["React", "TypeScript", "Tailwind CSS", "CSS Custom Properties"],
+    "maintainer": "Ohouse AI Team",
+    "references": [
+      "Material Design Spacing System",
+      "Apple Human Interface Guidelines", 
+      "IBM Carbon Design System",
+      "Atlassian Design System"
+    ]
+  }
+}

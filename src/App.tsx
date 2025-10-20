@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { FeatureCard } from "./components/FeatureCard";
 import { FilterChip } from "./components/FilterChip";
@@ -7,6 +7,7 @@ import { CreationPage } from "./components/CreationPage";
 import { RenderingQueueIndicator } from "./components/RenderingQueueIndicator";
 import { MyPageContent } from "./components/MyPageContent";
 import { CreationModeModal } from "./components/CreationModeModal";
+import { MediaViewer } from "./components/MediaViewer";
 import { Toaster } from "./components/ui/sonner";
 import { motion, AnimatePresence } from "motion/react";
 import { Palette, Home } from "lucide-react";
@@ -19,6 +20,7 @@ import {
 import { CreationPageState } from "./types";
 import { useRenderingQueue } from "./hooks/useRenderingQueue";
 import { useImageFilters } from "./hooks/useImageFilters";
+import { useMediaViewer } from "./hooks/useMediaViewer";
 
 const { ROOM_TYPES: roomTypes, STYLES: styles, BUDGETS: budgets } = FILTER_OPTIONS;
 
@@ -35,7 +37,7 @@ export default function App() {
   const [pendingRoomType, setPendingRoomType] = useState<string>("");
   const homeScrollRef = useRef<HTMLDivElement | null>(null);
   const lastScrollTopRef = useRef(0);
-  const [isTabBarHidden, setIsTabBarHidden] = useState(false);
+  const [isTabBarHidden, setIsTabBarHidden] = useState(false); // Always false - tab bar always visible
 
   // Use custom hooks for cleaner state management
   const {
@@ -59,6 +61,15 @@ export default function App() {
     handleLikeToggle,
     clearAllFilters,
   } = useImageFilters();
+
+  // Media viewer state
+  const {
+    selectedImage,
+    sourceElement,
+    openMediaViewer,
+    closeMediaViewer,
+    isOpen: isMediaViewerOpen
+  } = useMediaViewer();
   
   // Preserve creation page state for each page type
   const [creationPageStates, setCreationPageStates] = useState<Record<Page, CreationPageState>>({
@@ -68,46 +79,12 @@ export default function App() {
     exteriorDesign: { selectedSpace: "", selectedImage: "", showAnalysis: false, analysisCompleted: false },
   });
 
-  useEffect(() => {
-    if (currentPage !== "home" || activeTab !== "home") {
-      setIsTabBarHidden(false);
-      return;
-    }
-
-    const scrollContainer = homeScrollRef.current;
-    if (!scrollContainer) {
-      return;
-    }
-
-    lastScrollTopRef.current = scrollContainer.scrollTop;
-
-    const handleScroll = () => {
-      const currentTop = scrollContainer.scrollTop;
-      const delta = currentTop - lastScrollTopRef.current;
-      const nearTop = currentTop <= 16;
-
-      lastScrollTopRef.current = currentTop;
-
-      setIsTabBarHidden((prev) => {
-        if (nearTop) {
-          return false;
-        }
-        if (delta > 4) {
-          return true;
-        }
-        if (delta < -4) {
-          return false;
-        }
-        return prev;
-      });
-    };
-
-    scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => {
-      scrollContainer.removeEventListener("scroll", handleScroll);
-    };
-  }, [activeTab, currentPage]);
+  // Disabled: Tab bar hiding was causing jarring layout shifts
+  // The scroll listener that controlled isTabBarHidden has been removed
+  // to fix the weird animation/jank during scroll
+  // useEffect(() => {
+  //   ...scroll listener removed...
+  // }, [activeTab, currentPage]);
 
   const handleFeatureCardClick = (page: Page) => {
     setCurrentPage(page);
@@ -227,7 +204,7 @@ export default function App() {
               className="absolute inset-0 flex flex-col"
             >
               {/* iOS Top Navigation Bar */}
-              <div className="h-[44px] bg-background flex items-center justify-center px-4 shrink-0 relative">
+              <div className="sticky top-0 z-40 h-[44px] bg-background flex items-center justify-center px-4 shrink-0" style={{ transition: 'none' }}>
                 {/* Back button for My Page when coming from creation flow */}
                 {activeTab === "mypage" && previousPage && (
                   <button
@@ -270,89 +247,121 @@ export default function App() {
               </div>
 
               {/* Tabs Navigation and Content */}
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="flex-1 flex flex-col overflow-hidden gap-0"
+              >
                 {/* Tab Bar */}
-                <TabsList className="h-[44px] w-full rounded-none bg-background border-b border-border p-0 shrink-0 gap-0">
-                  <TabsTrigger 
-                    value="home" 
-                    className="flex-1 h-full rounded-none border-0 data-[state=active]:border-b-[2px] data-[state=active]:border-primary data-[state=active]:bg-transparent"
+                <div
+                  className="sticky z-30 bg-background overflow-hidden"
+                  style={{ top: `${NAV_BAR_HEIGHT}px`, height: isTabBarHidden ? 0 : TAB_BAR_HEIGHT, transition: 'none' }}
+                >
+                  <div
+                    className="h-[44px] border-b border-border"
+                    style={{ opacity: isTabBarHidden ? 0 : 1 }}
                   >
-                    Home
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="mypage" 
-                    className="flex-1 h-full rounded-none border-0 data-[state=active]:border-b-[2px] data-[state=active]:border-primary data-[state=active]:bg-transparent"
-                  >
-                    My Page
-                  </TabsTrigger>
-                </TabsList>
+                    <TabsList className="h-full w-full rounded-none bg-background p-0 gap-0 border-none">
+                      <TabsTrigger
+                        value="home"
+                        className="flex-1 h-full rounded-none border-0 data-[state=active]:border-b-[2px] data-[state=active]:border-primary data-[state=active]:bg-transparent"
+                      >
+                        Home
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="mypage"
+                        className="flex-1 h-full rounded-none border-0 data-[state=active]:border-b-[2px] data-[state=active]:border-primary data-[state=active]:bg-transparent"
+                      >
+                        My Page
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
+                </div>
 
                 {/* Tab Content Areas */}
-                <TabsContent value="home" className="flex-1 m-0 overflow-y-auto">
-                  {/* Creation Feature Entry Module */}
-                  <div className="px-4 py-4">
-                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                      <FeatureCard 
-                        title="Place an object in your room"
-                        icon={<span className="text-lg">🪑</span>}
-                        iconBgColor="#FFE5D9"
-                        onClick={() => handleFeatureCardClick("placeObject")}
-                      />
-                      <FeatureCard 
-                        title="Overall Interior design"
-                        icon={<Palette className="size-4 text-purple-600" />}
-                        iconBgColor="#E9D5FF"
-                        onClick={() => handleFeatureCardClick("interiorDesign")}
-                      />
-                      <FeatureCard 
-                        title="Exterior design"
-                        icon={<Home className="size-4 text-blue-600" />}
-                        iconBgColor="#DBEAFE"
-                        onClick={() => handleFeatureCardClick("exteriorDesign")}
-                      />
+                <TabsContent value="home" className="flex-1 m-0 overflow-hidden">
+                  <div ref={homeScrollRef} className="h-full overflow-y-auto pb-10">
+                    {/* Creation Feature Entry Module - 12px top, 12px bottom */}
+                    <div className="px-4 pt-3 pb-3" style={{ paddingTop: '12px', paddingBottom: '12px' }}>
+                      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                        <FeatureCard
+                          title="Place an object in your room"
+                          icon={<span className="text-lg">🪑</span>}
+                          iconBgColor="#FFE5D9"
+                          onClick={() => handleFeatureCardClick("placeObject")}
+                        />
+                        <FeatureCard
+                          title="Overall Interior design"
+                          icon={<Palette className="size-4 text-purple-600" />}
+                          iconBgColor="#E9D5FF"
+                          onClick={() => handleFeatureCardClick("interiorDesign")}
+                        />
+                        <FeatureCard
+                          title="Exterior design"
+                          icon={<Home className="size-4 text-blue-600" />}
+                          iconBgColor="#DBEAFE"
+                          onClick={() => handleFeatureCardClick("exteriorDesign")}
+                        />
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Explore Feed Section */}
-                  <div className="py-4">
-                    <div className="flex items-center justify-between px-4 mb-2">
-                      <h2>Explore Feed {(selectedRoomType || selectedStyle || selectedBudget) && <span className="text-xs text-gray-500 ml-2">({(selectedRoomType ? 1 : 0) + (selectedStyle ? 1 : 0) + (selectedBudget ? 1 : 0)} active)</span>}</h2>
-                      {(selectedRoomType || selectedStyle || selectedBudget) && (
-                        <button
-                          onClick={() => {
-                            setSelectedRoomType("");
-                            setSelectedStyle("");
-                            setSelectedBudget("");
-                          }}
-                          className="text-xs text-blue-600 hover:text-blue-700 font-medium"
-                        >
-                          Clear all
-                        </button>
-                      )}
+                    {/* Spacing gap - 12px */}
+                    <div style={{ height: '12px' }}></div>
+
+                    {/* Explore Feed Title - 12px bottom spacing */}
+                    <div className="px-4" style={{ paddingBottom: '12px' }}>
+                      <div className="flex items-center justify-between">
+                        <h2>
+                          Explore Feed{" "}
+                          {activeFilterCount > 0 && (
+                            <span className="text-xs text-gray-500 ml-2">
+                              ({activeFilterCount} active)
+                            </span>
+                          )}
+                        </h2>
+                        {activeFilterCount > 0 && (
+                          <button
+                            onClick={clearAllFilters}
+                            className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                          >
+                            Clear all
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex gap-2 overflow-x-auto pb-2 px-4 scrollbar-hide mt-2">
-                      <FilterChip
-                        label="Room Type"
-                        options={roomTypes}
-                        selectedValue={selectedRoomType}
-                        onSelect={handleRoomTypeSelect}
-                      />
-                      <FilterChip
-                        label="Style"
-                        options={styles}
-                        selectedValue={selectedStyle}
-                        onSelect={handleStyleSelect}
-                      />
-                      <FilterChip
-                        label="Budget"
-                        options={budgets}
-                        selectedValue={selectedBudget}
-                        onSelect={handleBudgetSelect}
-                      />
+
+                    {/* Filter Chips */}
+                    <div
+                      className="sticky z-20 bg-background px-4 pt-3 pb-3 shadow-[0_12px_24px_-24px_rgba(3,2,19,0.35)]"
+                      style={{ top: `${filterChipsOffset}px` }}
+                    >
+                      <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+                        <FilterChip
+                          label="Room Type"
+                          options={roomTypes}
+                          selectedValue={selectedRoomType}
+                          onSelect={handleRoomTypeSelect}
+                        />
+                        <FilterChip
+                          label="Style"
+                          options={styles}
+                          selectedValue={selectedStyle}
+                          onSelect={handleStyleSelect}
+                        />
+                        <FilterChip
+                          label="Budget"
+                          options={budgets}
+                          selectedValue={selectedBudget}
+                          onSelect={handleBudgetSelect}
+                        />
+                      </div>
                     </div>
-                    
-                    {/* Feed Grid */}
-                    <div className="grid grid-cols-2 gap-[9px] px-4 mt-2 pb-4">
+
+                    {/* Spacing gap - 12px */}
+                    <div style={{ height: '12px' }}></div>
+
+                    {/* Feed Grid - 16px padding, 8px gap */}
+                    <div className="grid grid-cols-2 gap-2" style={{ paddingLeft: '16px', paddingRight: '16px' }}>
                       {displayedImages.map((imageUrl, index) => (
                         <FeedCard
                           key={`${imageUrl}-${index}`}
@@ -360,17 +369,19 @@ export default function App() {
                           isLiked={likedImages.has(imageUrl)}
                           onLikeToggle={() => handleLikeToggle(imageUrl)}
                           onClick={() => {}}
+                          onImageClick={openMediaViewer}
                         />
                       ))}
                     </div>
                   </div>
                 </TabsContent>
 
-                <TabsContent value="mypage" className="flex-1 m-0 overflow-y-auto">
-                  <div className="pt-3 px-3">
+                <TabsContent value="mypage" className="flex-1 m-0 overflow-hidden">
+                  <div className="h-full overflow-y-auto p-4">
                     <MyPageContent
                       renderingItems={allRenderingItems}
                       onCreateRoom={handleCreateFromMyPage}
+                      onImageClick={openMediaViewer}
                     />
                   </div>
                 </TabsContent>
@@ -412,6 +423,14 @@ export default function App() {
           }}
           onSelectMode={handleCreationModeSelect}
           roomType={pendingRoomType}
+        />
+
+        {/* Media Viewer */}
+        <MediaViewer
+          isOpen={isMediaViewerOpen}
+          selectedImage={selectedImage}
+          sourceElement={sourceElement}
+          onClose={closeMediaViewer}
         />
       </div>
     </div>

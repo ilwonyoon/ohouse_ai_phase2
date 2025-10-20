@@ -61,7 +61,6 @@ export function ScanningImageOverlay({
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const [visibleChips, setVisibleChips] = useState<number>(0);
-  const [showHint, setShowHint] = useState(false);
 
   const handleChipSelect = (index: number) => {
     const newSelectedChip = selectedChip === index ? null : index;
@@ -88,13 +87,6 @@ export function ScanningImageOverlay({
     if (showProducts) {
       // Show all chips immediately
       setVisibleChips(productRecommendations.length);
-
-      // Show hint after a short delay
-      const hintTimer = setTimeout(() => {
-        setShowHint(true);
-      }, PRODUCT_CHIP_ANIMATION.HINT_APPEARANCE_DELAY_MS);
-
-      return () => clearTimeout(hintTimer);
     }
   }, [showProducts]);
 
@@ -232,7 +224,6 @@ export function ScanningImageOverlay({
                 onSelect={() => handleChipSelect(index)}
                 containerWidth={containerSize.width}
                 containerHeight={containerSize.height}
-                showHint={index === 0 && showHint}
               />
             )
           ))}

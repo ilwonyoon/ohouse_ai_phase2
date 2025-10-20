@@ -1,4 +1,5 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { motion } from "motion/react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Progress } from "./ui/progress";
 import { Sparkles } from "lucide-react";
@@ -9,6 +10,7 @@ import { Button } from "./ui/button";
 interface MyPageContentProps {
   renderingItems: RenderingItem[];
   onCreateRoom: (roomType: string) => void;
+  onImageClick?: (imageUrl: string, element: HTMLElement) => void;
 }
 
 const ROOM_TYPES = [
@@ -20,7 +22,7 @@ const ROOM_TYPES = [
   "Dining"
 ];
 
-export function MyPageContent({ renderingItems, onCreateRoom }: MyPageContentProps) {
+export function MyPageContent({ renderingItems, onCreateRoom, onImageClick }: MyPageContentProps) {
   const [selectedRoomFilter, setSelectedRoomFilter] = useState<string>("All");
 
   // Filter rendering items based on selected room type
@@ -90,44 +92,57 @@ export function MyPageContent({ renderingItems, onCreateRoom }: MyPageContentPro
         {filteredItems.length === 0 ? (
           renderEmptyState()
         ) : (
-          filteredItems.map((item) => (
-            <div key={item.id} className="relative aspect-square rounded-lg overflow-hidden">
-              {/* Original/Result Image */}
-              <ImageWithFallback
-                src={item.isComplete && item.resultImage ? item.resultImage : item.originalImage}
-                alt={`${item.roomType} rendering`}
-                className="size-full object-cover"
-              />
+          filteredItems.map((item) => {
+            const imageUrl = item.isComplete && item.resultImage ? item.resultImage : item.originalImage;
 
-              {/* In-Progress Overlay */}
-              {!item.isComplete && (
-                <>
-                  {/* Dim overlay */}
-                  <div className="absolute inset-0 bg-black/40" />
+            return (
+              <div
+                key={item.id}
+                className="relative aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={(e) => onImageClick?.(imageUrl, e.currentTarget as HTMLElement)}
+              >
+                {/* Original/Result Image */}
+                <motion.div
+                  layoutId={`image-${imageUrl}`}
+                  className="size-full"
+                >
+                  <ImageWithFallback
+                    src={imageUrl}
+                    alt={`${item.roomType} rendering`}
+                    className="size-full object-cover"
+                  />
+                </motion.div>
 
-                  {/* Progress bar in center */}
-                  <div className="absolute inset-0 flex items-center justify-center px-6">
-                    <div className="w-full space-y-2">
-                      <Progress
-                        value={item.progress}
-                        className="h-1 bg-white/20 [&>[data-slot=progress-indicator]]:bg-white"
-                      />
-                      <p className="text-white text-xs text-center font-medium">
-                        {Math.round(item.progress)}%
-                      </p>
+                {/* In-Progress Overlay */}
+                {!item.isComplete && (
+                  <>
+                    {/* Dim overlay */}
+                    <div className="absolute inset-0 bg-black/40" />
+
+                    {/* Progress bar in center */}
+                    <div className="absolute inset-0 flex items-center justify-center px-6">
+                      <div className="w-full space-y-2">
+                        <Progress
+                          value={item.progress}
+                          className="h-1 bg-white/20 [&>[data-slot=progress-indicator]]:bg-white"
+                        />
+                        <p className="text-white text-xs text-center font-medium">
+                          {Math.round(item.progress)}%
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </>
-              )}
+                  </>
+                )}
 
-              {/* Room type label */}
-              <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm rounded px-2 py-1">
-                <p className="text-white text-xs">
-                  {item.roomType}
-                </p>
+                {/* Room type label */}
+                <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm rounded px-2 py-1">
+                  <p className="text-white text-xs">
+                    {item.roomType}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>
