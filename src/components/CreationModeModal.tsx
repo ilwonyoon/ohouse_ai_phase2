@@ -1,9 +1,4 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "./ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "./ui/sheet";
 import { Palette, Home } from "lucide-react";
 
 interface CreationModeModalProps {
@@ -20,61 +15,73 @@ export function CreationModeModal({ isOpen, onClose, onSelectMode, roomType }: C
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[343px]">
-        <DialogHeader>
-          <DialogTitle>Choose creation mode</DialogTitle>
-        </DialogHeader>
-        <div className="flex flex-col gap-3 py-4">
-          {/* Place an Object */}
-          <button
-            onClick={() => handleModeSelect("placeObject")}
-            className="flex items-center gap-4 p-4 rounded-lg border-2 border-border hover:border-primary transition-colors text-left"
-          >
-            <div className="size-12 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "#FFE5D9" }}>
-              <span className="text-2xl">🪑</span>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-base mb-1">Place an object</h3>
-              <p className="text-sm text-muted-foreground">
-                Add furniture or decor to your {roomType.toLowerCase()}
-              </p>
-            </div>
-          </button>
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent
+        side="bottom"
+        className="h-auto max-h-[500px] rounded-t-[20px] p-0 w-[375px] !left-1/2 !-translate-x-1/2 !right-auto gap-0"
+        hideOverlay={false}
+      >
+        {/* Header */}
+        <SheetHeader className="px-5 pt-5 pb-4 border-b border-border relative">
+          <SheetTitle className="text-left text-lg font-semibold pr-8">Choose creation mode</SheetTitle>
+          <SheetDescription className="sr-only">
+            Select how you want to create content for your {roomType}
+          </SheetDescription>
+        </SheetHeader>
 
-          {/* Interior Design */}
-          <button
-            onClick={() => handleModeSelect("interiorDesign")}
-            className="flex items-center gap-4 p-4 rounded-lg border-2 border-border hover:border-primary transition-colors text-left"
-          >
-            <div className="size-12 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "#E9D5FF" }}>
-              <Palette className="size-6 text-purple-600" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-base mb-1">Interior design</h3>
-              <p className="text-sm text-muted-foreground">
-                Redesign your entire {roomType.toLowerCase()}
-              </p>
-            </div>
-          </button>
+        {/* Content with precise spacing */}
+        <div className="overflow-y-auto flex-1" style={{ paddingLeft: '20px', paddingRight: '20px', paddingTop: '20px', paddingBottom: '36px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {/* Place an Object */}
+            <button
+              onClick={() => handleModeSelect("placeObject")}
+              className="flex items-center gap-4 cursor-pointer hover:bg-accent/50 rounded-lg transition-colors text-left"
+            >
+              <div className="size-16 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: "#FFE5D9" }}>
+                <span className="text-3xl">🪑</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-base mb-1">Place an object</h3>
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  Add furniture or decor to your {roomType.toLowerCase()}
+                </p>
+              </div>
+            </button>
 
-          {/* Exterior Design */}
-          <button
-            onClick={() => handleModeSelect("exteriorDesign")}
-            className="flex items-center gap-4 p-4 rounded-lg border-2 border-border hover:border-primary transition-colors text-left"
-          >
-            <div className="size-12 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "#DBEAFE" }}>
-              <Home className="size-6 text-blue-600" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-base mb-1">Exterior design</h3>
-              <p className="text-sm text-muted-foreground">
-                Transform your outdoor space
-              </p>
-            </div>
-          </button>
+            {/* Interior Design */}
+            <button
+              onClick={() => handleModeSelect("interiorDesign")}
+              className="flex items-center gap-4 cursor-pointer hover:bg-accent/50 rounded-lg transition-colors text-left"
+            >
+              <div className="size-16 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: "#E9D5FF" }}>
+                <Palette className="size-7 text-purple-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-base mb-1">Interior design</h3>
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  Redesign your entire {roomType.toLowerCase()}
+                </p>
+              </div>
+            </button>
+
+            {/* Exterior Design */}
+            <button
+              onClick={() => handleModeSelect("exteriorDesign")}
+              className="flex items-center gap-4 cursor-pointer hover:bg-accent/50 rounded-lg transition-colors text-left"
+            >
+              <div className="size-16 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: "#DBEAFE" }}>
+                <Home className="size-7 text-blue-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-base mb-1">Exterior design</h3>
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  Transform your outdoor space
+                </p>
+              </div>
+            </button>
+          </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }

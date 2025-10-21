@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ProductChip } from "./ProductChip";
@@ -47,6 +47,9 @@ const detectionPoints = [
   ],
 ];
 
+const INTRO_TOOLTIP_DELAY_MS = 400;
+const PLACEMENT_TOOLTIP_AUTO_DISMISS_MS = 2000;
+
 export function ScanningImageOverlay({ 
   imageUrl, 
   alt, 
@@ -61,12 +64,12 @@ export function ScanningImageOverlay({
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const [visibleChips, setVisibleChips] = useState<number>(0);
-
-  const handleChipSelect = (index: number) => {
-    const newSelectedChip = selectedChip === index ? null : index;
-    setSelectedChip(newSelectedChip);
-    onProductSelect(newSelectedChip !== null ? productRecommendations[index].label : null);
-  };
+  const [introTooltipVisible, setIntroTooltipVisible] = useState(false);
+  const [placementTooltipVisible, setPlacementTooltipVisible] = useState(false);
+  const [hasShownPlacementTooltip, setHasShownPlacementTooltip] = useState(false);
+  const [onboardingComplete, setOnboardingComplete] = useState(false);
+  const introTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const placementTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -82,13 +85,111 @@ export function ScanningImageOverlay({
     }
   }, []);
 
-  // Show all chips at once
   useEffect(() => {
-    if (showProducts) {
-      // Show all chips immediately
-      setVisibleChips(productRecommendations.length);
+    return () => {
+      if (introTimerRef.current) {
+        clearTimeout(introTimerRef.current);
+      }
+      if (placementTimerRef.current) {
+        clearTimeout(placementTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleChipSelect = (index: number) => {
+    const newSelectedChip = selectedChip === index ? null : index;
+    setSelectedChip(newSelectedChip);
+    onProductSelect(newSelectedChip !== null ? productRecommendations[index].label : null);
+  };
+
+  const finishOnboarding = useCallback(() => {
+    if (introTimerRef.current) {
+      clearTimeout(introTimerRef.current);
+      introTimerRef.current = null;
     }
-  }, [showProducts]);
+
+    if (placementTimerRef.current) {
+      clearTimeout(placementTimerRef.current);
+      placementTimerRef.current = null;
+    }
+
+    setIntroTooltipVisible(false);
+    setPlacementTooltipVisible(false);
+    setVisibleChips(productRecommendations.length);
+    setOnboardingComplete(true);
+  }, []);
+
+  const dismissIntroTooltip = useCallback(() => {
+    if (introTimerRef.current) {
+      clearTimeout(introTimerRef.current);
+      introTimerRef.current = null;
+    }
+    setIntroTooltipVisible(false);
+  }, []);
+
+  const handlePrimaryChipDragStart = useCallback(() => {
+    if (onboardingComplete) return;
+    dismissIntroTooltip();
+  }, [dismissIntroTooltip, onboardingComplete]);
+
+  const handlePrimaryChipDragEnd = useCallback(
+    (wasMoved: boolean) => {
+      if (onboardingComplete || !wasMoved || hasShownPlacementTooltip) {
+        return;
+      }
+
+      dismissIntroTooltip();
+      setHasShownPlacementTooltip(true);
+      setPlacementTooltipVisible(true);
+
+      if (placementTimerRef.current) {
+        clearTimeout(placementTimerRef.current);
+      }
+
+      placementTimerRef.current = window.setTimeout(() => {
+        finishOnboarding();
+      }, PLACEMENT_TOOLTIP_AUTO_DISMISS_MS);
+    },
+    [dismissIntroTooltip, finishOnboarding, hasShownPlacementTooltip, onboardingComplete]
+  );
+
+  useEffect(() => {
+    if (!showProducts) {
+      setVisibleChips(0);
+      setIntroTooltipVisible(false);
+      setPlacementTooltipVisible(false);
+      setHasShownPlacementTooltip(false);
+      setOnboardingComplete(false);
+      if (introTimerRef.current) {
+        clearTimeout(introTimerRef.current);
+        introTimerRef.current = null;
+      }
+      if (placementTimerRef.current) {
+        clearTimeout(placementTimerRef.current);
+        placementTimerRef.current = null;
+      }
+      return;
+    }
+
+    if (onboardingComplete) {
+      setVisibleChips(productRecommendations.length);
+      return;
+    }
+
+    setHasShownPlacementTooltip(false);
+    setVisibleChips(1);
+
+    introTimerRef.current = window.setTimeout(() => {
+      setIntroTooltipVisible(true);
+    }, INTRO_TOOLTIP_DELAY_MS);
+
+    return () => {
+      if (introTimerRef.current) {
+        clearTimeout(introTimerRef.current);
+        introTimerRef.current = null;
+      }
+    };
+  }, [showProducts, onboardingComplete]);
 
   return (
     <div ref={containerRef} className="relative w-full aspect-[3/4]">
@@ -224,6 +325,16 @@ export function ScanningImageOverlay({
                 onSelect={() => handleChipSelect(index)}
                 containerWidth={containerSize.width}
                 containerHeight={containerSize.height}
+                introTooltipVisible={
+                  index === 0 && !onboardingComplete && introTooltipVisible
+                }
+                onIntroTooltipDismiss={index === 0 ? dismissIntroTooltip : undefined}
+                placementTooltipVisible={
+                  index === 0 && !onboardingComplete && placementTooltipVisible
+                }
+                placementTooltipText={`Drop position is where we can place the ${product.label}.`}
+                onDragStart={index === 0 ? handlePrimaryChipDragStart : undefined}
+                onDragEnd={index === 0 ? handlePrimaryChipDragEnd : undefined}
               />
             )
           ))}

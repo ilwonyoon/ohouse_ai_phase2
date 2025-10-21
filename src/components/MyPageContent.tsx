@@ -34,13 +34,28 @@ export function MyPageContent({ renderingItems, onCreateRoom, onImageClick }: My
   if (renderingItems.length === 0 && selectedRoomFilter === "All") {
     return (
       <div className="h-full flex flex-col items-center justify-center text-muted-foreground px-8 text-center">
-        <div className="size-16 rounded-full bg-purple-100 flex items-center justify-center mb-4">
+        {/* Icon - 20px (2xl) spacing below */}
+        <div className="size-16 rounded-full bg-purple-100 flex items-center justify-center" style={{ marginBottom: '20px' }}>
           <Sparkles className="size-8 text-purple-500" />
         </div>
-        <h3 className="mb-2">No renderings yet</h3>
-        <p className="text-sm">
+
+        {/* Heading - xl (20px) + semibold, 12px (lg) spacing below */}
+        <h3 className="text-xl font-semibold" style={{ marginBottom: '12px' }}>
+          No renderings yet
+        </h3>
+
+        {/* Description - base (16px) + regular, 20px (2xl) spacing below */}
+        <p className="text-base font-normal" style={{ marginBottom: '20px' }}>
           Your generated interior designs will appear here
         </p>
+
+        {/* Button */}
+        <Button
+          onClick={() => onCreateRoom("Living room")}
+          className="mt-0"
+        >
+          Create
+        </Button>
       </div>
     );
   }
@@ -51,16 +66,25 @@ export function MyPageContent({ renderingItems, onCreateRoom, onImageClick }: My
 
     return (
       <div className="col-span-2 flex flex-col items-center justify-center text-muted-foreground px-8 text-center py-16">
-        <div className="size-16 rounded-full bg-purple-100 flex items-center justify-center mb-4">
+        {/* Icon - 20px (2xl) spacing below */}
+        <div className="size-16 rounded-full bg-purple-100 flex items-center justify-center" style={{ marginBottom: '20px' }}>
           <Sparkles className="size-8 text-purple-500" />
         </div>
-        <h3 className="mb-2">No {selectedRoomFilter} yet</h3>
-        <p className="text-sm mb-4">
+
+        {/* Heading - xl (20px) + semibold, 12px (lg) spacing below */}
+        <h3 className="text-xl font-semibold" style={{ marginBottom: '12px' }}>
+          No {selectedRoomFilter} yet
+        </h3>
+
+        {/* Description - base (16px) + regular, 20px (2xl) spacing below */}
+        <p className="text-base font-normal" style={{ marginBottom: '20px' }}>
           Create your first {selectedRoomFilter.toLowerCase()} design
         </p>
+
+        {/* Button */}
         <Button
           onClick={() => onCreateRoom(selectedRoomFilter)}
-          className="mt-2"
+          className="mt-0"
         >
           Create
         </Button>
